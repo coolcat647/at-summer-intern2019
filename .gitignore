@@ -1,0 +1,16 @@
+*.ipynb_checkpoints/
+*.tmp
+*.pth
+*.bag
+*.pcd
+*.pyc
+*.swp
+*.swo
+*.vscode
+*.log
+
+# ROS related
+build/
+devel/
+.catkin_workspace
+
