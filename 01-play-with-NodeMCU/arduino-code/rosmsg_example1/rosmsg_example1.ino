@@ -4,9 +4,9 @@
 #include <std_msgs/Int32.h>
 
 // WiFi configuration. Replace '***' with your data
-const char* ssid = "***";
-const char* password = "***";
-IPAddress server(10, 42, 0, 133);  
+const char* ssid = "EE627";
+const char* password = "assistiverobotics";
+IPAddress server(192,168,50,38);  
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 

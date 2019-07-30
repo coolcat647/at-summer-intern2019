@@ -8,9 +8,9 @@
 #define PI 3.14159265359f
 
 // WiFi configuration. Replace '***' with your data
-const char* ssid = "***";
-const char* password = "***";
-IPAddress server(10, 42, 0, 133);  
+const char* ssid = "EE627";
+const char* password = "assistiverobotics";
+IPAddress server(192, 168, 50, 38);  
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 
@@ -50,7 +50,9 @@ double vy = -0.1;
 double vth = 0.1;
 
 char base_link[] = "/base_link";
+char base_link2[] = "/base_link2";
 char odom[] = "/odom";
+char odom2[] = "/odom2";
 
 
 void setup() {  
@@ -139,6 +141,43 @@ void loop() {
     
         //publish the message
         pub_odom.publish(&odom_msg);
+
+
+
+
+        // tf odom2->base_link2
+        tf_msg.header.frame_id = odom2;
+        tf_msg.child_frame_id = base_link2;
+        
+        tf_msg.transform.translation.x = x;
+        tf_msg.transform.translation.y = y;
+        tf_msg.transform.translation.z = 0.0f;
+        tf_msg.transform.rotation = tf::createQuaternionFromYaw(theta);
+        tf_msg.header.stamp = nh.now();
+        
+        broadcaster.sendTransform(tf_msg);
+
+
+        //next, we'll publish the odometry message over ROS
+        nav_msgs::Odometry odom2_msg;
+        odom_msg.header.stamp = current_time;
+        odom_msg.header.frame_id = "odom";
+    
+        //set the position
+        odom2_msg.pose.pose.position.x = x+1;
+        odom2_msg.pose.pose.position.y = y+1;
+        odom2_msg.pose.pose.position.z = 0.0;
+        odom2_msg.pose.pose.orientation = q;
+    
+        //set the velocity
+        odom2_msg.child_frame_id = "base_link2";
+        odom2_msg.twist.twist.linear.x = vx;
+        odom2_msg.twist.twist.linear.y = vy;
+        odom2_msg.twist.twist.angular.z = -vth;
+    
+        //publish the message
+        pub_odom.publish(&odom2_msg);
+
 
         last_time = current_time;
         
