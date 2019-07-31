@@ -35,7 +35,7 @@ ros::NodeHandle nh;
 
 // ROS topics object definitions 
 geometry_msgs::TransformStamped tf_msg;
-geometry_msgs::TransformStamped tf_msg2;
+//geometry_msgs::TransformStamped tf_msg2;
 nav_msgs::Odometry odom_msg;
 nav_msgs::Odometry odom_msg2;
 ros::Publisher pub_odom("odom", &odom_msg);
@@ -43,7 +43,7 @@ ros::Publisher pub_odom2("odom2", &odom_msg2);
 
 // Transform Broadcaster
 tf::TransformBroadcaster broadcaster;
-tf::TransformBroadcaster broadcaster2;
+//tf::TransformBroadcaster broadcaster2;
 
 double x = 0.0f;
 double y = 0.0f;
@@ -184,7 +184,36 @@ void loop() {
         odom_msg.twist.twist.linear.y = vy;
         odom_msg.twist.twist.angular.z = vth;
 
+        // tf odom->base_link(odom2/tf2)
+        tf_msg.header.frame_id = odom;
+        tf_msg.child_frame_id = base_link2;
+        
+        tf_msg.transform.translation.x = x_2;
+        tf_msg.transform.translation.y = y_2;
+        tf_msg.transform.translation.z = 0.0f;
+        tf_msg.transform.rotation = tf::createQuaternionFromYaw(theta_2);
+        tf_msg.header.stamp = nh.now();
+        
+        broadcaster.sendTransform(tf_msg);
 
+        //next, we'll publish the odometry message over ROS
+        //nav_msgs::Odometry odom_msg;
+        odom_msg2.header.stamp = current_time;
+        odom_msg2.header.frame_id = "odom";
+    
+        //set the position
+        odom_msg2.pose.pose.position.x = x_2;
+        odom_msg2.pose.pose.position.y = y_2;
+        odom_msg2.pose.pose.position.z = 0.0;
+        odom_msg2.pose.pose.orientation = q_2;
+    
+        //set the velocity
+        odom_msg2.child_frame_id = "base_link2";
+        odom_msg2.twist.twist.linear.x = vx_2;
+        odom_msg2.twist.twist.linear.y = vy_2;
+        odom_msg2.twist.twist.angular.z = vth_2;
+
+/*
         
         // tf odom->base_link(odom2/tf2)
         tf_msg2.header.frame_id = "odom";
@@ -200,7 +229,7 @@ void loop() {
 
         //next, we'll publish the odometry message over ROS
         //nav_msgs::Odometry odom_msg2;
-/*
+
         odom_msg2.header.stamp = current_time;
         odom_msg2.header.frame_id = "odom";
     
@@ -218,14 +247,15 @@ void loop() {
 */
         //publish the message
         pub_odom.publish(&odom_msg);
-        //pub_odom2.publish(&odom_msg2);
+        pub_odom2.publish(&odom_msg2);
         pub_bool.publish(&bool_msg);
 
+        Serial.println(current_time.toSec() - last_time.toSec());
         last_time = current_time;
         
     }else{
         Serial.println("Not Connected to ROS socket server");
     }
     nh.spinOnce();
-    delay(20);
+    delay(100);
 }
