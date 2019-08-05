@@ -11,7 +11,7 @@
 // WiFi configuration. Replace '***' with your data
 const char* ssid = "EE627";
 const char* password = "assistiverobotics";
-IPAddress server(192, 168, 50, 219);  
+IPAddress server(192, 168, 50, 126);  
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 
@@ -35,7 +35,6 @@ ros::NodeHandle nh;
 
 // ROS topics object definitions 
 geometry_msgs::TransformStamped tf_msg;
-//geometry_msgs::TransformStamped tf_msg2;
 nav_msgs::Odometry odom_msg;
 nav_msgs::Odometry odom_msg2;
 ros::Publisher pub_odom("odom", &odom_msg);
@@ -43,7 +42,6 @@ ros::Publisher pub_odom2("odom2", &odom_msg2);
 
 // Transform Broadcaster
 tf::TransformBroadcaster broadcaster;
-//tf::TransformBroadcaster broadcaster2;
 
 double x = 0.0f;
 double y = 0.0f;
@@ -71,7 +69,6 @@ char odom2[] = "/odom";
 std_msgs::Bool bool_msg;
 ros::Publisher pub_bool("reset_pose", &bool_msg);
 ros::Subscriber<std_msgs::Bool> sub_reset("flag", &flag_msg);
-//ros::Rate r(10.0);  //10Hz
 
 void setup() {  
     Serial.begin(115200);
@@ -168,7 +165,6 @@ void loop() {
         broadcaster.sendTransform(tf_msg);
 
         //next, we'll publish the odometry message over ROS
-        //nav_msgs::Odometry odom_msg;
         odom_msg.header.stamp = current_time;
         odom_msg.header.frame_id = "odom";
     
@@ -197,7 +193,6 @@ void loop() {
         broadcaster.sendTransform(tf_msg);
 
         //next, we'll publish the odometry message over ROS
-        //nav_msgs::Odometry odom_msg;
         odom_msg2.header.stamp = current_time;
         odom_msg2.header.frame_id = "odom";
     
@@ -213,44 +208,11 @@ void loop() {
         odom_msg2.twist.twist.linear.y = vy_2;
         odom_msg2.twist.twist.angular.z = vth_2;
 
-/*
-        
-        // tf odom->base_link(odom2/tf2)
-        tf_msg2.header.frame_id = "odom";
-        tf_msg2.child_frame_id = "base_link2";
-        
-        tf_msg2.transform.translation.x = x_2;
-        tf_msg2.transform.translation.y = y_2;
-        tf_msg2.transform.translation.z = 0.0f;
-        tf_msg2.transform.rotation = tf::createQuaternionFromYaw(theta_2);
-        tf_msg2.header.stamp = nh.now();
-        
-        broadcaster2.sendTransform(tf_msg2);
-
-        //next, we'll publish the odometry message over ROS
-        //nav_msgs::Odometry odom_msg2;
-
-        odom_msg2.header.stamp = current_time;
-        odom_msg2.header.frame_id = "odom";
-    
-        //set the position
-        odom_msg2.pose.pose.position.x = x_2;
-        odom_msg2.pose.pose.position.y = y_2;
-        odom_msg2.pose.pose.position.z = 0.0;
-        odom_msg2.pose.pose.orientation = q_2;
-    
-        //set the velocity
-        odom_msg2.child_frame_id = "base_link2";
-        odom_msg2.twist.twist.linear.x = vx_2;
-        odom_msg2.twist.twist.linear.y = vy_2;
-        odom_msg2.twist.twist.angular.z = vth_2;
-*/
         //publish the message
         pub_odom.publish(&odom_msg);
         pub_odom2.publish(&odom_msg2);
         pub_bool.publish(&bool_msg);
 
-        Serial.println(current_time.toSec() - last_time.toSec());
         last_time = current_time;
         
     }else{
