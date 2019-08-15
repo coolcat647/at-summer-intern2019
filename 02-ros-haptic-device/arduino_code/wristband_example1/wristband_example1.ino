@@ -15,7 +15,7 @@
 // WiFi configuration. Replace '***' with your data
 const char* ssid = "EE622";
 const char* password = "assistiverobotics";
-IPAddress server(192, 168, 50, *);
+IPAddress server(192, 168, 50, 212);
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 const int motor_pins[] = {D1, D2, D3};   //motor connect signal pin
@@ -87,7 +87,9 @@ void setup() {
     nh.getHardware()->setConnection(server, serverPort);
     nh.initNode();
     nh.subscribe(sub_motor);
-    
+
+    pinMode(LED_BUILTIN, OUTPUT);
+    delay(5000);   
 } 
 
 int intensity2pwm (int intensity_level) {
@@ -118,7 +120,10 @@ void printOut() {
   Serial.print(", ");
   Serial.print("frequency: ");
   for(int i = 0; i < NUM_MOTORS; i++) {
-      //Serial.print(motor_interval[vb_msg.motors[i].frequency-1]);
+      if(vb_msg.motors[i].frequency == 0)
+          Serial.print(0);
+      else
+          Serial.print(motor_interval[vb_msg.motors[i].frequency-1]);
       Serial.print(" ");
   }
   Serial.println();  
@@ -129,7 +134,7 @@ void loop() {
         for(int i = 0; i < NUM_MOTORS; i++)
             pwm[i] = intensity2pwm(vb_msg.motors[i].intensity);
         outIO();
-        // printOut();
+        printOut();
     }else{
         Serial.println("Not Connected to ROS socket server");
         delay(100);
