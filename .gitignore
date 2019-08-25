@@ -1,6 +1,9 @@
 *.ipynb_checkpoints/
 *.tmp
 *.pth
+*.pkl
+*.h5
+*.caffemodel
 *.bag
 *.pcd
 *.pyc
@@ -8,6 +11,8 @@
 *.swo
 *.vscode
 *.log
+*.zip
+*.tar
 
 # ROS related
 build/
