@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <group ns="guiding_robot">
+	    <!-- <node name="rosserial_server_node" pkg="rosserial_server" type="socket_node" required="true" output="log" /> -->
+        <include file="$(find rosserial_server)/launch/socket.launch" /> 
+	<node name="haptic_node" pkg="haptic_msgs" type="vibration_test.py" />
+    </group>
+</launch>
