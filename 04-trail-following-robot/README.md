@@ -30,7 +30,7 @@ Camera senosor
 ```
 
 ## II. Hardware
-<img src="./figures/hardware_v0.jpg" alt="trail-following-robot" width=512 />
+<img src="./figures/hardware_v1.jpg" alt="trail-following-robot" width=512 />
 
 
 ## III. Software
