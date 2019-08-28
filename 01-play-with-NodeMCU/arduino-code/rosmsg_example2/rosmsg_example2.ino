@@ -10,7 +10,7 @@
 // WiFi configuration. Replace '***' with your data
 const char* ssid = "EE627";
 const char* password = "assistiverobotics";
-IPAddress server(192, 168, 50, 38);  
+IPAddress server(192, 168, 50, 219);
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 
@@ -185,5 +185,5 @@ void loop() {
       Serial.println("Not Connected to ROS socket server");
     }
     nh.spinOnce();
-    delay(20);
+    delay(50);
 }
