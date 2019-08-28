@@ -9,8 +9,7 @@
 #define D0 16
 #define D1 5
 #define D2 4
-#define D3 0
-#define D4 2
+#define D5 14
 
 // WiFi configuration. Replace '***' with your data
 const char* ssid = "EE622";
@@ -18,7 +17,7 @@ const char* password = "assistiverobotics";
 IPAddress server(192, 168, 50, 212);
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
-const int motor_pins[] = {D1, D2, D3};   //motor connect signal pin
+const int motor_pins[] = {D5, D2, D1};   //motor connect signal pin
 const int NUM_MOTORS = sizeof(motor_pins)/sizeof(motor_pins[0]);
 const int motor_interval[] = {500, 250, 125, 100, 50};  //vibrate cycle T/2
 const int pwm_min = 500;
@@ -80,8 +79,6 @@ void setup() {
         vb_msg.motors[i].frequency = 0;
     }
     
-    // LED pin output configuration
-    // pinMode(LED_BUILTIN, OUTPUT);
 
     // Port NodeMCU Wi-Fi interface to ROS interface
     nh.getHardware()->setConnection(server, serverPort);
@@ -89,7 +86,7 @@ void setup() {
     nh.subscribe(sub_motor);
 
     pinMode(LED_BUILTIN, OUTPUT);
-    delay(5000);   
+    delay(5000);
 } 
 
 int intensity2pwm (int intensity_level) {
@@ -120,11 +117,11 @@ void printOut() {
   Serial.print(", ");
   Serial.print("frequency: ");
   for(int i = 0; i < NUM_MOTORS; i++) {
-      if(vb_msg.motors[i].frequency == 0)
-          Serial.print(0);
-      else
-          Serial.print(motor_interval[vb_msg.motors[i].frequency-1]);
-      Serial.print(" ");
+    if (vb_msg.motors[i].frequency == 0)
+      Serial.print(0);
+    else
+      Serial.print(motor_interval[vb_msg.motors[i].frequency-1]);
+    Serial.print(" ");
   }
   Serial.println();  
 }
