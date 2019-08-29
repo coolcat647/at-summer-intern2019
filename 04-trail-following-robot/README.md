@@ -24,9 +24,13 @@ Joystick control
 ```bash
     roslaunch jetbot_ros joystick.launch
 ```
-Camera senosor
+Camera sensor
 ```bash
     roslaunch video_stream_opencv camera.launch
+```
+2D Lidar
+```bash
+    roslaunch ydlidar lidar.launch
 ```
 
 ## II. Hardware
