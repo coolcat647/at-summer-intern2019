@@ -6,8 +6,6 @@
 #include <tf/transform_listener.h>
 #include <sensor_msgs/PointCloud2.h>
 
-
-
 laser_geometry::LaserProjection projector_;
 ros::Publisher point_cloud_publisher_;
 tf::TransformListener listener_;
