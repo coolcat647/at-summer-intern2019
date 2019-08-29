@@ -6,7 +6,7 @@
 #include <laser_geometry/laser_geometry.h>
 
 laser_geometry::LaserProjection projector_
-ensor_msgs::PointCloud2 oint_cloud_publisher_;
+sensor_msgs::PointCloud2 point_cloud_publisher_;
 tf::TransformListener listener_;
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
@@ -24,7 +24,7 @@ void laserscan_cb(const sensor_msgs::LaserScan::ConstPtr& scan_in)
     }
 
     sensor_msgs::PointCloud2 cloud;
-    projector_.transformLaserScanToPointCloud("base_link", *scan, cloud, tfListener_);
+    projector_.transformLaserScanToPointCloud("base_link", *scan_in, cloud, Listener_);
     point_cloud_publisher_.publish(cloud);
     
 }
