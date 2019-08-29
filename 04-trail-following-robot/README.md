@@ -6,6 +6,7 @@ ARG summer interns will help complete this section included instruction, hardwar
 Check for the following prerequisites:
 - Nvidia Jetson Nano (Jetpack 4.2)
 - Pi camera v2
+- YDLIDAR G4
 - Adafruit motor HAT with two DC motors
 - Git clone summer intern repository
 
