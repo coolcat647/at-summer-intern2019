@@ -16,7 +16,7 @@
   	"file:///$(find your_camera_package)/config/your_camera.yaml" -->
     <arg name="camera_info_url" default="" />
   	<!-- flip the image horizontally (mirror it) -->
-  	<arg name="flip_horizontal" default="false" />
+  	<arg name="flip_horizontal" default="true" />
   	<!-- flip the image vertically -->
   	<arg name="flip_vertical" default="true" />
     <!-- force width and height, 0 means no forcing -->
