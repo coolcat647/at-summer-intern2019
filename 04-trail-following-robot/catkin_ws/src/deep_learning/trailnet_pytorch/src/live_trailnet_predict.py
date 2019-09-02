@@ -107,12 +107,12 @@ class TrailnetNode(object):
         self.model.eval()
         rospy.loginfo('TrailNet Model has been loaded.')
 
-        with torch.no_grad():
-            rospy.loginfo('Test model by input a blank image.')
-            blank_image = np.zeros((480, 640, 3), np.uint8)
-            input_image = self.data_transform(blank_image).unsqueeze(0)
-            output_idx = np.argmax(self.model(input_image.cuda()).cpu())
-            print self.CLASSES[output_idx]
+        # with torch.no_grad():
+        #     rospy.loginfo('Test model by input a blank image.')
+        #     blank_image = np.zeros((480, 640, 3), np.uint8)
+        #     input_image = self.data_transform(blank_image).unsqueeze(0)
+        #     output_idx = np.argmax(self.model(input_image.cuda()).cpu())
+        #     print self.CLASSES[output_idx]
             
 
     def image_cb(self, msg):

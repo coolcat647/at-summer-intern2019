@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+    <remap from="/image_raw" to=                                                                                                                                                                                                                                                                                                                                                                "/camera/image_raw" />
     <node name="trailnet_prediction_node" pkg="trailnet_pytorch" type="live_trailnet_predict.py" output="screen" required="true">
         <rosparam file="$(find trailnet_pytorch)/config/trailnet_params.yaml" command="load" />
     </node>
