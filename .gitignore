@@ -17,6 +17,7 @@
 # ROS related
 build/
 devel/
+models/
 .catkin_workspace
 
 # Compiled Object files
