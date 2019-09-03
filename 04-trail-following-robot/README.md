@@ -33,6 +33,10 @@ Camera sensor
 ```bash
     roslaunch ydlidar lidar.launch
 ```
+TrailNet prediction
+```bash
+    roslaunch trailnet_pytorch trailnet_prediction.launch
+```
 
 ## II. Hardware
 <img src="./figures/hardware_v1.jpg" alt="trail-following-robot" width=512 />
