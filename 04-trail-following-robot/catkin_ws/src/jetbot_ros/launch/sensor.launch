@@ -2,5 +2,7 @@
 	<include file="$(find jetbot_ros)/launch/joystick.launch" />
     <include file="$(find ydlidar)/launch/lidar.launch" />
 	<include file="$(find video_stream_opencv)/launch/camera.launch" />
+	<include file="$(find deep_learning)/launch/trailnet_predict.launch" />
+	<include file="$(find rosserial_server)/launch/socket.launch" />
 	<node name="obs_detect" pkg="obstacle_detection" type="obstacle_detection_node" />
 </launch>
