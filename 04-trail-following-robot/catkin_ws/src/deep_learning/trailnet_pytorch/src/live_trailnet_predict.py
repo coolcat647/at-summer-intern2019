@@ -9,11 +9,14 @@ import PIL
 import numpy as np
 import h5py
 import gdown
+import time
 
 import rospy
 import rospkg
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Joy
 
 import torch
 from torch import nn
@@ -66,8 +69,14 @@ class TrailnetNode(object):
         self.bridge = CvBridge()
         rospy.on_shutdown(self.shutdown_cb)
 
+        # FLAG!!
+        self.flag_auto = False
+        self.old_btn_state = 0
+
         # ROS subscriber
         self.sub_image = rospy.Subscriber('image_raw', Image, self.image_cb)
+        self.sub_joy = rospy.Subscriber('joy', Joy, self.joy_cb)
+        self.pub_nav = rospy.Publisher('cmd_vel', Twist, queue_size=1)
 
         # ROS get parameters
         MODEL_NAME = rospy.get_param('~model', 'trailnet_3class_epoch0_loss0.02158.pth')
@@ -105,31 +114,70 @@ class TrailnetNode(object):
         self.model = TrailNet3Class()
         self.load_pretrained_model(self.model, model_path, use_cuda=USE_CUDA)
         self.model.eval()
+        time.sleep(5)
         rospy.loginfo('TrailNet Model has been loaded.')
-
-        # with torch.no_grad():
-        #     rospy.loginfo('Test model by input a blank image.')
-        #     blank_image = np.zeros((480, 640, 3), np.uint8)
-        #     input_image = self.data_transform(blank_image).unsqueeze(0)
-        #     output_idx = np.argmax(self.model(input_image.cuda()).cpu())
-        #     print self.CLASSES[output_idx]
-            
-
-    def image_cb(self, msg):
-        try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
-        except CvBridgeError as e:
-            print(e)
+        
 
         with torch.no_grad():
-            input_image = self.data_transform(cv_image).unsqueeze(0)
+            rospy.loginfo('Testing model by input a blank image...')
+            blank_image = np.zeros((480, 640, 3), np.uint8)
+            input_image = self.data_transform(blank_image).unsqueeze(0)
             output_idx = np.argmax(self.model(input_image.cuda()).cpu())
-            print self.CLASSES[output_idx]
+            output_idx = np.argmax(self.model(input_image.cuda()).cpu())
+            # print self.CLASSES[output_idx]
+        rospy.loginfo('TrailNet is ready.')
+    
+
+    def joy_cb(self, msg):
+        # Joystick button 'B' can start/stop auto navigation mode
+        if self.old_btn_state == 0 and msg.buttons[1] == 1:
+            if self.flag_auto == False:
+                self.flag_auto = True
+                rospy.loginfo('Start auto-navigation mode.')
+                # time.sleep(1)
+            else:
+                self.flag_auto = False
+                self.pub_nav.publish(Twist())
+                self.pub_nav.publish(Twist())
+                self.pub_nav.publish(Twist())
+                rospy.loginfo('Change to joystick control mode.')
+
+        self.old_btn_state = msg.buttons[1]
+
         
+    def image_cb(self, msg):
+        if self.flag_auto:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(msg, "rgb8")
+            except CvBridgeError as e:
+                print(e)
+
+            with torch.no_grad():
+                input_image = self.data_transform(cv_image).unsqueeze(0)
+                output_idx = np.argmax(self.model(input_image.cuda()).cpu())
+                prediction = self.CLASSES[output_idx]
+                
+                # Car command 
+                cmd_msg = Twist()
+                if prediction == 'S':
+                    cmd_msg.linear.x = 0.3
+                    cmd_msg.angular.z = 0.0
+                elif prediction == 'L':
+                    cmd_msg.linear.x = 0.2
+                    cmd_msg.angular.z = -0.5
+                elif prediction == 'R':
+                    cmd_msg.linear.x = 0.2
+                    cmd_msg.angular.z = 0.5
+                
+                self.pub_nav.publish(cmd_msg)
+            
 
     def shutdown_cb(self):
         rospy.loginfo("Shutdown " + rospy.get_name() + '!')
-        del self.model
+        if hasattr(self, 'model'):
+            del self.model
+        if hasattr(self, 'pub_nav'):
+            self.pub_nav.publish(Twist())
 
 
     def load_pretrained_model(self, model, file_path, use_cuda):
