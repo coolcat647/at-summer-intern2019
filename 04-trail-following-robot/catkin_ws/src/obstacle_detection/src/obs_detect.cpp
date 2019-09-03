@@ -1,6 +1,7 @@
 #include <string.h>
 #include <iostream>
 #include <math.h>
+#include <stdlib.h>
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -16,12 +17,17 @@
 #include <tf/transform_listener.h>
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
+#include <haptic_msgs/Wristband.h>
+#include <haptic_msgs/VibrationArray.h>
+#include <haptic_msgs/Vibration.h>
+#include <std_msgs/Int32.h>
 
 #define PI 3.14159265f
 #define DEGREE_OF_VIEW 90.0f
 #define DEGREE_OF_CENTER 40.0f
 #define DANGER_DISTANCE 1
 #define UNSAFETY_DISTANCE 1.5
+#define NUM_MOTORS 3
 
 
 using namespace std;
@@ -34,10 +40,12 @@ class LaserObstacleDetection{
     
     ros::Publisher pub_cloud_;
     ros::Publisher pub_range_;
+    ros::Publisher pub_wristband_;
     ros::Subscriber sub_laser_;
     laser_geometry::LaserProjection projector_;
     tf::TransformListener listener_;
     sensor_msgs::Range detection_range;
+    haptic_msgs::Wristband wmsg;
 
     enum FILED{
         DANGER_FRONT= 0,
@@ -65,6 +73,7 @@ class LaserObstacleDetection{
         // ROS publisher
         pub_cloud_ = nh_.advertise<sensor_msgs::PointCloud2> ("cloud", 1);
         pub_range_ = nh_.advertise<sensor_msgs::Range> ("detection_field", 1);
+        pub_wristband_ = nh_.advertise<haptic_msgs::Wristband> ("wristbands_vbmsg", 1);
         detection_range.header.frame_id = "laser_frame";
         detection_range.radiation_type = sensor_msgs::Range::INFRARED;
         detection_range.field_of_view = DEGREE_OF_VIEW * PI / 180.0;
@@ -72,6 +81,13 @@ class LaserObstacleDetection{
         detection_range.max_range = UNSAFETY_DISTANCE;
         detection_range.range = UNSAFETY_DISTANCE;
 
+        // Initialize Wristband message
+        // solution ref: https://answers.ros.org/question/273480/publish-and-subscribe-array-of-vector-as-message/
+        for(int i=0; i < NUM_MOTORS; i++){
+            haptic_msgs::Vibration v;
+            wmsg.left.motors.push_back(v);
+            wmsg.right.motors.push_back(v);
+        }
     }
 
     uint16_t point_to_field(float x, float y){
@@ -155,13 +171,82 @@ class LaserObstacleDetection{
             cout << "[" << FILED_NAMES[i] << "]:" << vote[i] << ",\t";
         }
         cout << "\n======================" << endl;
-        
+
+        // wmsg.left = (haptic_msgs::VibrationArray*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
+        // wmsg.right = (haptic_msgs::VibrationArray*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
+
+        for(int i = 0; i < NUM_MOTORS; i++){
+            wmsg.left.motors[i].frequency = 0;
+            wmsg.left.motors[i].intensity = 0;
+            wmsg.right.motors[i].frequency = 0;
+            wmsg.right.motors[i].intensity = 0;
+        }
+        for (int i = 0; i < 6; i++){
+            if(vote[i] > 30){
+                switch(i){
+                    case 0:
+                        for(int j = 0; j < 3; j++){
+                            wmsg.left.motors[j].frequency = 3;
+                            wmsg.left.motors[j].intensity = 5;
+                            wmsg.right.motors[j].frequency = 3;
+                            wmsg.right.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 1:
+                        for(int j = 0; j < 3; j++){
+                            wmsg.left.motors[j].frequency = 5;
+                            wmsg.left.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 2:
+                        for(int j = 0; j < 3; j++){
+                            wmsg.right.motors[j].frequency = 5;
+                            wmsg.right.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 3:
+                        if(wmsg.left.motors[0].frequency != 0 && wmsg.right.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wmsg.left.motors[j].frequency = 1;
+                                wmsg.left.motors[j].intensity = 3;
+                                wmsg.right.motors[j].frequency = 1;
+                                wmsg.right.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    case 4:
+                        if(wmsg.left.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wmsg.left.motors[j].frequency = 3;
+                                wmsg.left.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    case 5:
+                        if(wmsg.right.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wmsg.right.motors[j].frequency = 3;
+                                wmsg.right.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    default: break;
+                }
+            }     
+        }
 
         // Publish the data
         pub_cloud_.publish(*cloud_filtered);
 
         detection_range.header.stamp = ros::Time::now();
         pub_range_.publish(detection_range);
+        pub_wristband_.publish(wmsg);
     }
 };
 
