@@ -16,12 +16,17 @@
 #include <tf/transform_listener.h>
 #include <tf/message_filter.h>
 #include <message_filters/subscriber.h>
+#include <haptic_msgs/Wristband.h>
+#include <haptic_msgs/VibrationArray.h>
+#include <haptic_msgs/Vibration.h>
+#include <std_msgs/Int32.h>
 
 #define PI 3.14159265f
 #define DEGREE_OF_VIEW 90.0f
 #define DEGREE_OF_CENTER 40.0f
 #define DANGER_DISTANCE 1
 #define UNSAFETY_DISTANCE 1.5
+#define NUM_MOTORS 3
 
 
 using namespace std;
@@ -65,6 +70,7 @@ class LaserObstacleDetection{
         // ROS publisher
         pub_cloud_ = nh_.advertise<sensor_msgs::PointCloud2> ("cloud", 1);
         pub_range_ = nh_.advertise<sensor_msgs::Range> ("detection_field", 1);
+        pub_wristband_ = nh_.advertise<haptic_msgs::Wristband> ("wristbands_msg", 1);
         detection_range.header.frame_id = "laser_frame";
         detection_range.radiation_type = sensor_msgs::Range::INFRARED;
         detection_range.field_of_view = DEGREE_OF_VIEW * PI / 180.0;
@@ -156,12 +162,80 @@ class LaserObstacleDetection{
         }
         cout << "\n======================" << endl;
         
-
+        haptic_msgs::Wristband wristbands_msg;
+        wristbands_msg.left.motors = (haptic_msgs::Vibration*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
+        wristbands_msg.right.motors = (haptic_msgs::Vibration*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
+        for(int i = 0; i < NUM_MOTORS; i++){
+            wristbands_msg.left.motors[i].frequency = 0;
+            wristbands_msg.left.motors[i].intensity = 0;
+            wristbands_msg.right.motors[i].frequency = 0;
+            wristbands_msg.right.motors[i].intensity = 0;
+        }
+        for (int i = 0; i < 6; i++){
+            if(vote[i] > 30){
+                switch(i){
+                    case 0:
+                        for(int j = 0; j < 3; j++){
+                            wristbands_msg.left.motors[j].frequency = 3;
+                            wristbands_msg.left.motors[j].intensity = 5;
+                            wristbands_msg.right.motors[j].frequency = 3;
+                            wristbands_msg.right.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 1:
+                        for(int j = 0; j < 3; j++){
+                            wristbands_msg.left.motors[j].frequency = 5;
+                            wristbands_msg.left.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 2:
+                        for(int j = 0; j < 3; j++){
+                            wristbands_msg.right.motors[j].frequency = 5;
+                            wristbands_msg.right.motors[j].intensity = 5;
+                        }
+                        break;
+                    case 3:
+                        if(wristbands_msg.left.motors[0].frequency != 0 && wristbands_msg.right.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wristbands_msg.left.motors[j].frequency = 1;
+                                wristbands_msg.left.motors[j].intensity = 3;
+                                wristbands_msg.right.motors[j].frequency = 1;
+                                wristbands_msg.right.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    case 4:
+                        if(wristbands_msg.left.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wristbands_msg.left.motors[j].frequency = 3;
+                                wristbands_msg.left.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    case 5:
+                        if(wristbands_msg.right.motors[0].frequency != 0)
+                            break;
+                        else{
+                            for(int j = 0; j < 3; j++){
+                                wristbands_msg.right.motors[j].frequency = 3;
+                                wristbands_msg.right.motors[j].intensity = 3;
+                            }
+                        }
+                        break;
+                    default: break;
+                }
+            }     
+        }
         // Publish the data
         pub_cloud_.publish(*cloud_filtered);
 
         detection_range.header.stamp = ros::Time::now();
         pub_range_.publish(detection_range);
+        pub_wristband_.publish(wristbands_msg);
     }
 };
 
