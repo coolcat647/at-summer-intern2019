@@ -1,0 +1,3 @@
+model:      trailnet_3class_epoch0_loss0.02158.pth
+model_url:  https://drive.google.com/uc?id=1lZrKBSLlZJ5GC0aNNDEi57SGG_fq1M6R
+use_cuda:   True
