@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   laser_geometry
   sensor_msgs
+  haptic_msgs
 )
 
 ## System dependencies are found with CMake's conventions

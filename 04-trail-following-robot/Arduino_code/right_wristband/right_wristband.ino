@@ -32,7 +32,7 @@ ros::NodeHandle nh;
 haptic_msgs::VibrationArray vb_msg;
 
 // ROS topics object definitions publisher and subscriber
-ros::Subscriber<haptic_msgs::Wristband> sub_motor("wristband_msg", &vibration_cb);
+ros::Subscriber<haptic_msgs::Wristband> sub_motor("wristbands_vbmsg", &vibration_cb);
 
 int pwm[NUM_MOTORS];
 
