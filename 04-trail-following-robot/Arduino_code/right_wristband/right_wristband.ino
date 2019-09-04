@@ -13,9 +13,9 @@
 #define D5 14
 
 // WiFi configuration. Replace '***' with your data
-const char* ssid = "EE622";
+const char* ssid = "at-summer-intern";
 const char* password = "assistiverobotics";
-IPAddress server(192, 168, 50, 212);
+IPAddress server(10, 42, 0, 1);
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
 const int motor_pins[] = {D5, D2, D1};   //motor connect signal pin
@@ -101,12 +101,18 @@ int intensity2pwm (int intensity_level) {
 }
 
 void outIO() {
-    for(int i = 0; i < NUM_MOTORS; i++) {
-        analogWrite(motor_pins[i], pwm[i]);
-        delay(motor_interval[vb_msg.motors[i].frequency-1]);
-        analogWrite(motor_pins[i], 0);
-        delay(motor_interval[vb_msg.motors[i].frequency-1]); 
-    }
+    analogWrite(motor_pins[0], pwm[0]);
+    analogWrite(motor_pins[1], pwm[1]);
+    analogWrite(motor_pins[2], pwm[2]);
+    delay(motor_interval[vb_msg.motors[0].frequency-1]);
+    delay(motor_interval[vb_msg.motors[1].frequency-1]);
+    delay(motor_interval[vb_msg.motors[2].frequency-1]);
+    analogWrite(motor_pins[0], 0);
+    analogWrite(motor_pins[1], 0);
+    analogWrite(motor_pins[2], 0);
+    delay(motor_interval[vb_msg.motors[0].frequency-1]);
+    delay(motor_interval[vb_msg.motors[1].frequency-1]);
+    delay(motor_interval[vb_msg.motors[2].frequency-1]);
 }
 
 void printOut() {

@@ -2,6 +2,9 @@
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+#include <ctime>
+#include <cstdlib>
+#include <unistd.h>
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -88,6 +91,28 @@ class LaserObstacleDetection{
             wmsg.left.motors.push_back(v);
             wmsg.right.motors.push_back(v);
         }
+
+        for(int i=0; i < NUM_MOTORS; i++){
+            wmsg.left.motors[i].frequency = 0;
+            wmsg.left.motors[i].intensity = 0;
+            wmsg.right.motors[i].frequency = 0;
+            wmsg.right.motors[i].intensity = 0;
+        }
+/*
+        srand(time(NULL));
+        int i_l = rand()%5 + 1;
+        int i_r = rand()%5 + 1;
+        int f_l = rand()%5 + 1;
+        int f_r = rand()%5 + 1;
+        for(int i=0; i < NUM_MOTORS; i++){
+            wmsg.left.motors[i].frequency = f_l;
+            wmsg.left.motors[i].intensity = i_l;
+            wmsg.right.motors[i].frequency = f_r;
+            wmsg.right.motors[i].intensity = i_r;
+        }
+        usleep(10000);
+        pub_wristband_.publish(wmsg);
+*/
     }
 
     uint16_t point_to_field(float x, float y){
@@ -175,12 +200,6 @@ class LaserObstacleDetection{
         // wmsg.left = (haptic_msgs::VibrationArray*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
         // wmsg.right = (haptic_msgs::VibrationArray*)malloc(NUM_MOTORS * sizeof(haptic_msgs::Vibration));
 
-        for(int i = 0; i < NUM_MOTORS; i++){
-            wmsg.left.motors[i].frequency = 0;
-            wmsg.left.motors[i].intensity = 0;
-            wmsg.right.motors[i].frequency = 0;
-            wmsg.right.motors[i].intensity = 0;
-        }
         for (int i = 0; i < 6; i++){
             if(vote[i] > 30){
                 switch(i){
@@ -236,10 +255,12 @@ class LaserObstacleDetection{
                             }
                         }
                         break;
-                    default: break;
+                    default: 
+                        break;
                 }
             }     
         }
+        sleep(5);
 
         // Publish the data
         pub_cloud_.publish(*cloud_filtered);
