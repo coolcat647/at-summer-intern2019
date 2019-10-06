@@ -8,8 +8,8 @@
 #define PI 3.14159265359f
 
 // WiFi configuration. Replace '***' with your data
-const char* ssid = "EE627";
-const char* password = "assistiverobotics";
+const char* ssid = "******";
+const char* password = "********";
 IPAddress server(192, 168, 50, 219);  
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 

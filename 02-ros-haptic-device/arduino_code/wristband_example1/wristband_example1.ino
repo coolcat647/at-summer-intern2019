@@ -12,8 +12,8 @@
 #define D5 14
 
 // WiFi configuration. Replace '***' with your data
-const char* ssid = "EE622";
-const char* password = "assistiverobotics";
+const char* ssid = "********";
+const char* password = "********";
 IPAddress server(192, 168, 50, 212);
 const uint16_t serverPort = 11411;      // Set the rosserial socket server port
 
